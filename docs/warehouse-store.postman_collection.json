@@ -1,0 +1,159 @@
+{
+  "info": {
+    "name": "Warehouse & Store API",
+    "_postman_id": "fcs-assignment-warehouse-store",
+    "description": "Collection for testing Warehouse and Store APIs of the Java/Quarkus assignment.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ],
+  "item": [
+    {
+      "name": "Warehouse - List all",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/warehouse",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "warehouse"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Warehouse - Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"businessUnitCode\": \"MWH.999\",\n  \"location\": \"AMSTERDAM-001\",\n  \"capacity\": 50,\n  \"stock\": 10\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/warehouse",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "warehouse"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Warehouse - Get by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/warehouse/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "warehouse",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Warehouse - Archive by ID",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/warehouse/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "warehouse",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Warehouse - Replace by Business Unit Code",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"location\": \"ZWOLLE-001\",\n  \"capacity\": 120,\n  \"stock\": 10\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/warehouse/MWH.001/replacement",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "warehouse",
+            "MWH.001",
+            "replacement"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Store - List all",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/store",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "store"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Store - Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"NEW_STORE\",\n  \"quantityProductsInStock\": 5\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/store",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "store"
+          ]
+        }
+      }
+    }
+  ]
+}
