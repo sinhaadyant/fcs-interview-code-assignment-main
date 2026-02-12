@@ -85,5 +85,72 @@ public class StoreEndpointTest {
             containsString("BESTÅ"),
             containsString("NEW_STORE_PATCHED"));
   }
+
+  @Test
+  public void getSingle_shouldReturn404WhenStoreNotFound() {
+    given()
+        .when()
+        .get("store/99999")
+        .then()
+        .statusCode(404);
+  }
+
+  @Test
+  public void create_shouldReturn422WithStructuredErrorWhenIdSetOnRequest() {
+    given()
+        .contentType("application/json")
+        .body(
+            """
+            {
+              "id": 1,
+              "name": "BAD_STORE",
+              "quantityProductsInStock": 0
+            }
+            """)
+        .when()
+        .post("store")
+        .then()
+        .statusCode(422)
+        .body(containsString("status"))
+        .body(containsString("message"));
+  }
+
+  @Test
+  public void update_shouldReturn404WhenStoreNotFound() {
+    given()
+        .contentType("application/json")
+        .body(
+            """
+            {
+              "name": "UPDATED",
+              "quantityProductsInStock": 0
+            }
+            """)
+        .when()
+        .put("store/99999")
+        .then()
+        .statusCode(404);
+  }
+
+  @Test
+  public void delete_shouldReturn404WhenStoreNotFound() {
+    given()
+        .when()
+        .delete("store/99999")
+        .then()
+        .statusCode(404);
+  }
+
+  @Test
+  public void errorResponse_shouldHaveStructuredFormatWithStatusAndMessage() {
+    given()
+        .when()
+        .get("store/99999")
+        .then()
+        .statusCode(404)
+        .body(containsString("status"))
+        .body(containsString("message"))
+        .body(containsString("traceId"));
+  }
 }
 

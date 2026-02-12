@@ -101,6 +101,105 @@ public class ReplaceWarehouseUseCaseTest {
     assertThrows(IllegalStateException.class, () -> useCase.replace(replacement));
   }
 
+  @Test
+  void replace_shouldFail_whenCapacityIsNullOrInvalid() {
+    Warehouse current = new Warehouse();
+    current.businessUnitCode = "MWH.CAP";
+    current.location = "AMSTERDAM-001";
+    current.capacity = 50;
+    current.stock = 10;
+    current.createdAt = LocalDateTime.now();
+    warehouseStore.create(current);
+
+    Warehouse replacement = new Warehouse();
+    replacement.businessUnitCode = "MWH.CAP";
+    replacement.location = "AMSTERDAM-001";
+    replacement.capacity = null;
+    replacement.stock = 10;
+    assertThrows(IllegalArgumentException.class, () -> useCase.replace(replacement));
+
+    replacement.capacity = 0;
+    assertThrows(IllegalArgumentException.class, () -> useCase.replace(replacement));
+  }
+
+  @Test
+  void replace_shouldFail_whenStockIsNegative() {
+    Warehouse current = new Warehouse();
+    current.businessUnitCode = "MWH.NEG";
+    current.location = "AMSTERDAM-001";
+    current.capacity = 50;
+    current.stock = 10;
+    current.createdAt = LocalDateTime.now();
+    warehouseStore.create(current);
+
+    Warehouse replacement = new Warehouse();
+    replacement.businessUnitCode = "MWH.NEG";
+    replacement.location = "AMSTERDAM-001";
+    replacement.capacity = 60;
+    replacement.stock = -1;
+    assertThrows(IllegalArgumentException.class, () -> useCase.replace(replacement));
+  }
+
+  @Test
+  void replace_shouldFail_whenNewWarehouseIsNull() {
+    assertThrows(IllegalArgumentException.class, () -> useCase.replace(null));
+  }
+
+  @Test
+  void replace_shouldFail_whenBusinessUnitCodeIsBlank() {
+    Warehouse replacement = new Warehouse();
+    replacement.businessUnitCode = "  ";
+    replacement.location = "AMSTERDAM-001";
+    replacement.capacity = 10;
+    replacement.stock = 5;
+    assertThrows(IllegalArgumentException.class, () -> useCase.replace(replacement));
+  }
+
+  @Test
+  void replace_shouldFail_whenLocationNotFound() {
+    Warehouse current = new Warehouse();
+    current.businessUnitCode = "MWH.LOC";
+    current.location = "AMSTERDAM-001";
+    current.capacity = 50;
+    current.stock = 10;
+    current.createdAt = LocalDateTime.now();
+    warehouseStore.create(current);
+
+    Warehouse replacement = new Warehouse();
+    replacement.businessUnitCode = "MWH.LOC";
+    replacement.location = "UNKNOWN-LOC";
+    replacement.capacity = 60;
+    replacement.stock = 10;
+    assertThrows(IllegalArgumentException.class, () -> useCase.replace(replacement));
+  }
+
+  @Test
+  void replace_shouldFail_whenLocationMaxWarehousesReached() {
+    // Use a resolver with max 2 warehouses at AMSTERDAM-001 so A1+A3 (excluding A2) = 2 >= 2
+    locationResolver = new InMemoryLocationResolver(2, 200);
+    useCase = new ReplaceWarehouseUseCase(warehouseStore, locationResolver);
+    warehouseStore.create(newWarehouse("MWH.A1", "AMSTERDAM-001"));
+    warehouseStore.create(newWarehouse("MWH.A2", "AMSTERDAM-001"));
+    warehouseStore.create(newWarehouse("MWH.A3", "AMSTERDAM-001"));
+
+    Warehouse replacement = new Warehouse();
+    replacement.businessUnitCode = "MWH.A2";
+    replacement.location = "AMSTERDAM-001";
+    replacement.capacity = 60;
+    replacement.stock = 5;
+    assertThrows(IllegalStateException.class, () -> useCase.replace(replacement));
+  }
+
+  private static Warehouse newWarehouse(String buCode, String location) {
+    Warehouse w = new Warehouse();
+    w.businessUnitCode = buCode;
+    w.location = location;
+    w.capacity = 50;
+    w.stock = 10;
+    w.createdAt = LocalDateTime.now();
+    return w;
+  }
+
   private static class InMemoryWarehouseStore implements WarehouseStore {
     private final List<Warehouse> warehouses = new ArrayList<>();
 
@@ -144,6 +243,10 @@ public class ReplaceWarehouseUseCaseTest {
 
     InMemoryLocationResolver() {
       locations.add(new Location("AMSTERDAM-001", 3, 200));
+    }
+
+    InMemoryLocationResolver(int maxWarehouses, int maxCapacity) {
+      locations.add(new Location("AMSTERDAM-001", maxWarehouses, maxCapacity));
     }
 
     @Override

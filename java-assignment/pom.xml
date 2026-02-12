@@ -61,6 +61,12 @@
             <version>2.4.7</version>
         </dependency>
 
+        <!-- Swagger UI + OpenAPI endpoint (e.g. /q/swagger-ui, /q/openapi) -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-openapi</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -85,7 +91,32 @@
                             <excludes>
                                 <!-- Exclude generated OpenAPI beans from coverage metrics -->
                                 <exclude>com/warehouse/api/beans/*</exclude>
+                                <exclude>com/warehouse/api/WarehouseResource*</exclude>
                             </excludes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>check</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.40</minimum>
+                                        </limit>
+                                    </limits>
+                                    <excludes>
+                                        <exclude>com/warehouse/api/**</exclude>
+                                    </excludes>
+                                </rule>
+                            </rules>
                         </configuration>
                     </execution>
                 </executions>

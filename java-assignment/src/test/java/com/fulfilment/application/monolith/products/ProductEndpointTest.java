@@ -73,4 +73,69 @@ public class ProductEndpointTest {
             containsString("BESTÅ"),
             containsString("NEW_PRODUCT_UPDATED"));
   }
+
+  @Test
+  public void getSingle_shouldReturn404WhenProductNotFound() {
+    given()
+        .when()
+        .get("product/99999")
+        .then()
+        .statusCode(404);
+  }
+
+  @Test
+  public void create_shouldReturn422WhenIdSetOnRequest() {
+    given()
+        .contentType("application/json")
+        .body(
+            """
+            {
+              "id": 1,
+              "name": "BAD_PRODUCT",
+              "stock": 0
+            }
+            """)
+        .when()
+        .post("product")
+        .then()
+        .statusCode(422);
+  }
+
+  @Test
+  public void update_shouldReturn404WhenProductNotFound() {
+    given()
+        .contentType("application/json")
+        .body(
+            """
+            {
+              "name": "UPDATED",
+              "stock": 0
+            }
+            """)
+        .when()
+        .put("product/99999")
+        .then()
+        .statusCode(404);
+  }
+
+  @Test
+  public void delete_shouldReturn404WhenProductNotFound() {
+    given()
+        .when()
+        .delete("product/99999")
+        .then()
+        .statusCode(404);
+  }
+
+  @Test
+  public void errorResponse_shouldHaveStructuredFormatWithStatusAndMessage() {
+    given()
+        .when()
+        .get("product/99999")
+        .then()
+        .statusCode(404)
+        .body(containsString("status"))
+        .body(containsString("message"))
+        .body(containsString("traceId"));
+  }
 }

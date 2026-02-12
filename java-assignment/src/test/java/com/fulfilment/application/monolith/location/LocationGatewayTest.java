@@ -28,4 +28,10 @@ public class LocationGatewayTest {
 
     assertNull(location);
   }
+
+  @Test
+  public void testWhenResolveNullIdentifierShouldReturnNull() {
+    LocationGateway locationGateway = new LocationGateway();
+    assertNull(locationGateway.resolveByIdentifier(null));
+  }
 }

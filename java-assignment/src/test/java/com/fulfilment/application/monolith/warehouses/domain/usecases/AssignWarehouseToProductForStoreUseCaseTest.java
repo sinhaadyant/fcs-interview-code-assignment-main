@@ -108,6 +108,43 @@ public class AssignWarehouseToProductForStoreUseCaseTest {
         () -> useCase.assign(store.id, "MWH.720", 6L));
   }
 
+  @Test
+  void assign_shouldFail_whenAnyParamIsNull() {
+    warehouseStore.create(newWarehouse("MWH.NULL"));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> useCase.assign(null, "MWH.NULL", 1L));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> useCase.assign(1L, null, 1L));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> useCase.assign(1L, "MWH.NULL", null));
+  }
+
+  @Test
+  void assign_shouldFail_whenWarehouseNotFound() {
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> useCase.assign(1L, "NONEXISTENT", 1L));
+  }
+
+  @Test
+  void assign_shouldBeIdempotent_whenAssignmentAlreadyExists() {
+    Store store = new Store("STORE-1");
+    store.id = 1L;
+    Warehouse warehouse = newWarehouse("MWH.IDEM");
+    warehouseStore.create(warehouse);
+    Product product = new Product("P1");
+    product.id = 1L;
+
+    useCase.assign(store.id, warehouse.businessUnitCode, product.id);
+    assertEquals(1, productFulfilmentStore.assignments.size());
+
+    useCase.assign(store.id, warehouse.businessUnitCode, product.id);
+    assertEquals(1, productFulfilmentStore.assignments.size());
+  }
+
   private static ProductFulfilmentAssignment assignment(
       Long storeId, String warehouseBuCode, Long productId) {
     ProductFulfilmentAssignment a = new ProductFulfilmentAssignment();

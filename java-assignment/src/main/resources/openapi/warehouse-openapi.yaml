@@ -1,13 +1,16 @@
 openapi: 3.0.0
 info:
   title: Warehouse API
-  description: API for managing products in a warehouse
+  description: |
+    API for managing warehouse units. All 4xx/5xx error responses use a common JSON format
+    (code, error, exceptionType) shared with Store and Product APIs.
   version: 1.0.0
 
 paths:
   /warehouse:
     get:
       summary: List all warehouses units
+      description: Returns only active (non-archived) warehouses. Pagination via query params page, size.
       responses:
         '200':
           description: A list of warehouse units

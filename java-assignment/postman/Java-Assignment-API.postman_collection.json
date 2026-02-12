@@ -1,0 +1,183 @@
+{
+  "info": {
+    "name": "Java Code Assignment API",
+    "description": "Store, Product, and Warehouse REST APIs. Set `baseUrl` to e.g. http://localhost:8080 when the app is running.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" }
+  ],
+  "item": [
+    {
+      "name": "Store",
+      "item": [
+        {
+          "name": "List stores",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/store?page=0&size=50"
+          }
+        },
+        {
+          "name": "Get store by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/store/1"
+          }
+        },
+        {
+          "name": "Create store",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"NEW_STORE\",\n  \"quantityProductsInStock\": 5\n}"
+            },
+            "url": "{{baseUrl}}/store"
+          }
+        },
+        {
+          "name": "Update store",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"UPDATED_STORE\",\n  \"quantityProductsInStock\": 10\n}"
+            },
+            "url": "{{baseUrl}}/store/1"
+          }
+        },
+        {
+          "name": "Patch store",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"PATCHED_STORE\",\n  \"quantityProductsInStock\": 15\n}"
+            },
+            "url": "{{baseUrl}}/store/1"
+          }
+        },
+        {
+          "name": "Delete store",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/store/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Product",
+      "item": [
+        {
+          "name": "List products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/product?page=0&size=50"
+          }
+        },
+        {
+          "name": "Get product by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/product/1"
+          }
+        },
+        {
+          "name": "Create product",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"NEW_PRODUCT\",\n  \"stock\": 20\n}"
+            },
+            "url": "{{baseUrl}}/product"
+          }
+        },
+        {
+          "name": "Update product",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"UPDATED_PRODUCT\",\n  \"stock\": 25\n}"
+            },
+            "url": "{{baseUrl}}/product/1"
+          }
+        },
+        {
+          "name": "Delete product",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/product/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Warehouse",
+      "item": [
+        {
+          "name": "List warehouses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/warehouse?page=0&size=50"
+          }
+        },
+        {
+          "name": "Get warehouse by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/warehouse/1"
+          }
+        },
+        {
+          "name": "Create warehouse",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessUnitCode\": \"MWH.NEW.001\",\n  \"location\": \"VETSBY-001\",\n  \"capacity\": 80,\n  \"stock\": 20\n}"
+            },
+            "url": "{{baseUrl}}/warehouse"
+          }
+        },
+        {
+          "name": "Replace warehouse",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"location\": \"AMSTERDAM-001\",\n  \"capacity\": 60,\n  \"stock\": 5\n}"
+            },
+            "url": "{{baseUrl}}/warehouse/MWH.012/replacement"
+          }
+        },
+        {
+          "name": "Archive warehouse",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/warehouse/3"
+          }
+        }
+      ]
+    }
+  ]
+}

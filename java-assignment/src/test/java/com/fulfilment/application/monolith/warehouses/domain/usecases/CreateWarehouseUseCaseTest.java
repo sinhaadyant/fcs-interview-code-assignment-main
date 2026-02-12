@@ -116,6 +116,64 @@ public class CreateWarehouseUseCaseTest {
     assertThrows(IllegalStateException.class, () -> useCase.create(candidate));
   }
 
+  @Test
+  void create_shouldFail_whenWarehouseIsNull() {
+    assertThrows(IllegalArgumentException.class, () -> useCase.create(null));
+  }
+
+  @Test
+  void create_shouldFail_whenBusinessUnitCodeIsBlank() {
+    Warehouse warehouse = new Warehouse();
+    warehouse.businessUnitCode = "   ";
+    warehouse.location = "AMSTERDAM-001";
+    warehouse.capacity = 10;
+    warehouse.stock = 5;
+    assertThrows(IllegalArgumentException.class, () -> useCase.create(warehouse));
+  }
+
+  @Test
+  void create_shouldFail_whenCapacityIsNullOrZero() {
+    Warehouse warehouse = new Warehouse();
+    warehouse.businessUnitCode = "MWH.NC";
+    warehouse.location = "AMSTERDAM-001";
+    warehouse.capacity = null;
+    warehouse.stock = 5;
+    assertThrows(IllegalArgumentException.class, () -> useCase.create(warehouse));
+
+    warehouse.capacity = 0;
+    assertThrows(IllegalArgumentException.class, () -> useCase.create(warehouse));
+  }
+
+  @Test
+  void create_shouldFail_whenStockIsNegative() {
+    Warehouse warehouse = new Warehouse();
+    warehouse.businessUnitCode = "MWH.NS";
+    warehouse.location = "AMSTERDAM-001";
+    warehouse.capacity = 10;
+    warehouse.stock = -1;
+    assertThrows(IllegalArgumentException.class, () -> useCase.create(warehouse));
+  }
+
+  @Test
+  void create_shouldFail_whenStockExceedsCapacity() {
+    Warehouse warehouse = new Warehouse();
+    warehouse.businessUnitCode = "MWH.SC";
+    warehouse.location = "AMSTERDAM-001";
+    warehouse.capacity = 10;
+    warehouse.stock = 11;
+    assertThrows(IllegalArgumentException.class, () -> useCase.create(warehouse));
+  }
+
+  @Test
+  void create_shouldFail_whenLocationIsBlank() {
+    Warehouse warehouse = new Warehouse();
+    warehouse.businessUnitCode = "MWH.BL";
+    warehouse.location = "  ";
+    warehouse.capacity = 10;
+    warehouse.stock = 5;
+    assertThrows(IllegalArgumentException.class, () -> useCase.create(warehouse));
+  }
+
   private static class InMemoryWarehouseStore implements WarehouseStore {
     private final List<Warehouse> warehouses = new ArrayList<>();
 

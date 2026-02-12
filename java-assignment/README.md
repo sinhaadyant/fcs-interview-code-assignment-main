@@ -4,7 +4,9 @@ This is a short code assignment that explores various aspects of software develo
 
 ## About the assignment
 
-You will find the tasks of this assignment on [CODE_ASSIGNMENT](CODE_ASSIGNMENT.md) file
+You will find the tasks of this assignment on [CODE_ASSIGNMENT](CODE_ASSIGNMENT.md) file.
+
+For a detailed technical description of the implementation, requirements compliance, and test strategy, see [DOCUMENTATION](DOCUMENTATION.md). For a senior architect review, gap analysis, and improvement suggestions, see [ARCHITECTURE_REVIEW_AND_IMPROVEMENTS](ARCHITECTURE_REVIEW_AND_IMPROVEMENTS.md).
 
 ## About the code base
 
@@ -80,8 +82,32 @@ Navigate to:
 
 <http://localhost:8080/index.html>
 
+## API documentation (Swagger UI)
+
+With the app running (e.g. `./mvnw quarkus:dev`):
+
+- **Swagger UI:** <http://localhost:8080/q/swagger-ui> — explore and try Store, Product, and Warehouse endpoints.
+- **OpenAPI JSON:** <http://localhost:8080/q/openapi> — machine-readable API spec.
+
+## Postman
+
+A Postman collection is provided for all APIs:
+
+- **File:** `postman/Java-Assignment-API.postman_collection.json`
+- **Import:** In Postman, **Import** → choose this file (or the `postman` folder).
+- **Variable:** The collection uses `baseUrl` (default `http://localhost:8080`). Change it in the collection variables if your server runs elsewhere.
+
+The collection includes: **Store** (list, get, create, update, patch, delete), **Product** (list, get, create, update, delete), **Warehouse** (list, get, create, replace, archive).
+
 Have fun, and join the team of contributors!
 
 ## Troubleshooting
 
 Using **IntelliJ**, in case the generated code is not recognized and you have compilation failures, you may need to add `target/.../jaxrs` folder as "generated sources".
+
+## Ready for GitHub
+
+- **Build & tests:** `./mvnw clean test` — all 58 tests and JaCoCo should pass.
+- **Run locally:** `./mvnw quarkus:dev` (or use PostgreSQL and `./mvnw package` then `java -jar target/quarkus-app/quarkus-run.jar`).
+- **APIs:** Store (`/store`), Product (`/product`), Warehouse (`/warehouse`), Location (used by warehouse). Error responses use a common structured format (status, message, traceId).
+- Before publishing: ensure no secrets in `application.properties`, and that `target/` is in `.gitignore`.

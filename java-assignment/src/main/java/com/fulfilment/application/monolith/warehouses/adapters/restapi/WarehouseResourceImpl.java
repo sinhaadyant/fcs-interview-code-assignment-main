@@ -10,8 +10,11 @@ import com.warehouse.api.beans.Warehouse;
 import io.quarkus.panache.common.Page;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import java.util.List;
 import org.jboss.logging.Logger;
@@ -45,15 +48,14 @@ public class WarehouseResourceImpl implements WarehouseResource {
     int pageIndex = parseIntQueryParam("page", 0);
     int pageSize = parseIntQueryParam("size", 50);
     LOGGER.infov("Listing warehouses page={0}, size={1}", pageIndex, pageSize);
-    return warehouseRepository.findAll()
-        .page(Page.of(pageIndex, pageSize))
+    return warehouseRepository.findActivePage(Page.of(pageIndex, pageSize))
         .stream()
-        .map(DbWarehouse::toWarehouse)
         .map(this::toWarehouseResponse)
         .toList();
   }
 
   @Override
+  @Transactional
   public Warehouse createANewWarehouseUnit(@NotNull Warehouse data) {
     com.fulfilment.application.monolith.warehouses.domain.models.Warehouse warehouse =
         toDomainWarehouse(data);
@@ -61,46 +63,48 @@ public class WarehouseResourceImpl implements WarehouseResource {
         "Creating warehouse businessUnitCode={0}, location={1}",
         warehouse.businessUnitCode, warehouse.location);
     createWarehouseOperation.create(warehouse);
-    return toWarehouseResponse(warehouse);
+    DbWarehouse created = warehouseRepository.findEntityByBusinessUnitCode(warehouse.businessUnitCode);
+    return created != null ? toWarehouseResponse(created) : toWarehouseResponse(warehouse);
   }
 
   @Override
   public Warehouse getAWarehouseUnitByID(String id) {
     if (id == null) {
-      return null;
+      throw new WebApplicationException("Warehouse id is required", Response.Status.NOT_FOUND.getStatusCode());
     }
 
     Long dbId;
     try {
       dbId = Long.valueOf(id);
     } catch (NumberFormatException ex) {
-      return null;
+      throw new WebApplicationException("Warehouse unit not found", Response.Status.NOT_FOUND.getStatusCode());
     }
 
     DbWarehouse dbWarehouse = warehouseRepository.findById(dbId);
     if (dbWarehouse == null || dbWarehouse.archivedAt != null) {
-      return null;
+      throw new WebApplicationException("Warehouse unit not found", Response.Status.NOT_FOUND.getStatusCode());
     }
 
-    return toWarehouseResponse(dbWarehouse.toWarehouse());
+    return toWarehouseResponse(dbWarehouse);
   }
 
   @Override
+  @Transactional
   public void archiveAWarehouseUnitByID(String id) {
     if (id == null) {
-      return;
+      throw new WebApplicationException("Warehouse id is required", Response.Status.NOT_FOUND.getStatusCode());
     }
 
     Long dbId;
     try {
       dbId = Long.valueOf(id);
     } catch (NumberFormatException ex) {
-      return;
+      throw new WebApplicationException("Warehouse unit not found", Response.Status.NOT_FOUND.getStatusCode());
     }
 
     DbWarehouse dbWarehouse = warehouseRepository.findById(dbId);
     if (dbWarehouse == null || dbWarehouse.archivedAt != null) {
-      return;
+      throw new WebApplicationException("Warehouse unit not found", Response.Status.NOT_FOUND.getStatusCode());
     }
 
     com.fulfilment.application.monolith.warehouses.domain.models.Warehouse warehouse =
@@ -112,6 +116,7 @@ public class WarehouseResourceImpl implements WarehouseResource {
   }
 
   @Override
+  @Transactional
   public Warehouse replaceTheCurrentActiveWarehouse(
       String businessUnitCode, @NotNull Warehouse data) {
     com.fulfilment.application.monolith.warehouses.domain.models.Warehouse warehouse =
@@ -119,7 +124,20 @@ public class WarehouseResourceImpl implements WarehouseResource {
     warehouse.businessUnitCode = businessUnitCode;
     LOGGER.infov("Replacing warehouse businessUnitCode={0}", businessUnitCode);
     replaceWarehouseOperation.replace(warehouse);
-    return toWarehouseResponse(warehouse);
+    DbWarehouse created = warehouseRepository.findEntityByBusinessUnitCode(businessUnitCode);
+    return created != null ? toWarehouseResponse(created) : toWarehouseResponse(warehouse);
+  }
+
+  private Warehouse toWarehouseResponse(DbWarehouse entity) {
+    var response = new Warehouse();
+    if (entity.id != null) {
+      response.setId(String.valueOf(entity.id));
+    }
+    response.setBusinessUnitCode(entity.businessUnitCode);
+    response.setLocation(entity.location);
+    response.setCapacity(entity.capacity);
+    response.setStock(entity.stock);
+    return response;
   }
 
   private Warehouse toWarehouseResponse(
@@ -129,7 +147,6 @@ public class WarehouseResourceImpl implements WarehouseResource {
     response.setLocation(warehouse.location);
     response.setCapacity(warehouse.capacity);
     response.setStock(warehouse.stock);
-
     return response;
   }
 

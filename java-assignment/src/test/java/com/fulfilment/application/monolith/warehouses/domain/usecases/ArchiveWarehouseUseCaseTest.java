@@ -54,6 +54,18 @@ public class ArchiveWarehouseUseCaseTest {
     assertThrows(IllegalStateException.class, () -> useCase.archive(request));
   }
 
+  @Test
+  void archive_shouldFail_whenWarehouseIsNull() {
+    assertThrows(IllegalArgumentException.class, () -> useCase.archive(null));
+  }
+
+  @Test
+  void archive_shouldFail_whenBusinessUnitCodeIsBlank() {
+    Warehouse request = new Warehouse();
+    request.businessUnitCode = "   ";
+    assertThrows(IllegalArgumentException.class, () -> useCase.archive(request));
+  }
+
   private static class InMemoryWarehouseStore implements WarehouseStore {
     private final List<Warehouse> warehouses = new ArrayList<>();
 
