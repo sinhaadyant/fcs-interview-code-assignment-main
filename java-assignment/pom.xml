@@ -67,6 +67,12 @@
             <artifactId>quarkus-smallrye-openapi</artifactId>
         </dependency>
 
+        <!-- Health checks: liveness, readiness (e.g. /q/health/live, /q/health/ready) -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-health</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

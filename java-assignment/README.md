@@ -89,6 +89,16 @@ With the app running (e.g. `./mvnw quarkus:dev`):
 - **Swagger UI:** <http://localhost:8080/q/swagger-ui> — explore and try Store, Product, and Warehouse endpoints.
 - **OpenAPI JSON:** <http://localhost:8080/q/openapi> — machine-readable API spec.
 
+## Health checks
+
+With the app running:
+
+- **Combined:** <http://localhost:8080/q/health> — overall status (JSON).
+- **Liveness:** <http://localhost:8080/q/health/live> — is the app running (e.g. for Kubernetes).
+- **Readiness:** <http://localhost:8080/q/health/ready> — is the app ready to serve traffic (includes DB connectivity).
+
+Use these in orchestrators (Kubernetes, Docker, or load balancers) for probes.
+
 ## Postman
 
 A Postman collection is provided for all APIs:
@@ -110,4 +120,31 @@ Using **IntelliJ**, in case the generated code is not recognized and you have co
 - **Build & tests:** `./mvnw clean test` — all 58 tests and JaCoCo should pass.
 - **Run locally:** `./mvnw quarkus:dev` (or use PostgreSQL and `./mvnw package` then `java -jar target/quarkus-app/quarkus-run.jar`).
 - **APIs:** Store (`/store`), Product (`/product`), Warehouse (`/warehouse`), Location (used by warehouse). Error responses use a common structured format (status, message, traceId).
+- **CI/CD:** GitHub Actions workflow (`.github/workflows/java-assignment-ci.yml`) runs on push/PR to `main` or `master`: build, test, and package; JAR is uploaded as an artifact.
 - Before publishing: ensure no secrets in `application.properties`, and that `target/` is in `.gitignore`.
+
+### Push to GitHub and share the link
+
+1. **Create a new repository** on GitHub (e.g. `fcs-java-assignment` or your preferred name).
+
+2. **From the project root** (the folder that contains `java-assignment` and `.github`):
+
+   ```bash
+   git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
+   git add .
+   git commit -m "Java assignment: Store, Product, Warehouse APIs with CI/CD and health checks"
+   git branch -M main
+   git push -u origin main
+   ```
+
+   If this repo is already a clone and you only need to push updates:
+
+   ```bash
+   git add .
+   git commit -m "Add CI/CD, health checks, Postman, Swagger; update docs"
+   git push origin main
+   ```
+
+3. **Share the link:**  
+   **Repository:** `https://github.com/YOUR_USERNAME/YOUR_REPO`  
+   (Replace `YOUR_USERNAME` and `YOUR_REPO` with your GitHub username and repository name.)

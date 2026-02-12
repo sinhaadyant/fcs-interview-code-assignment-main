@@ -1,15 +1,14 @@
-name: Java Assignment CI
+name: Java Assignment CI/CD
 
 on:
   push:
-    branches:
-      - "**"
+    branches: [ main, master ]
   pull_request:
-    branches:
-      - "**"
+    branches: [ main, master ]
 
 jobs:
-  build-and-test:
+  build-test-package:
+    name: Build, test & package
     runs-on: ubuntu-latest
 
     steps:
@@ -23,9 +22,16 @@ jobs:
           java-version: "17"
           cache: maven
 
-      - name: Build and test (java-assignment)
+      - name: Build, test and package (java-assignment)
         working-directory: ./java-assignment
         run: |
           chmod +x ./mvnw
-          ./mvnw -B test
+          ./mvnw -B clean package -DskipTests=false
+
+      - name: Upload JAR (artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: quarkus-app
+          path: java-assignment/target/quarkus-app/
+          if-no-files-found: warn
 
