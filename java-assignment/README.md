@@ -55,7 +55,7 @@ The base tasks are defined in **[CODE_ASSIGNMENT.md](CODE_ASSIGNMENT.md)**:
 
 - **Structured error responses** — All 4xx/5xx use a common JSON shape: `timestamp`, `status`, `error`, `message`, `path`, `errorCode`, `traceId`, optional `details[]`. Handled by `GlobalApiExceptionMapper`; no stack traces in responses.
 - **Request tracing** — `RequestContextFilter` generates or reads `X-Request-Id`, stores requestId/path/language in `RequestContext`; every error response includes `traceId`; completion logged with `requestId`, `path`, `status`, `processingTimeMs`.
-- **i18n (en/hi)** — `MessageService` and `messages_en.properties` / `messages_hi.properties`; `Accept-Language` drives language; error/success messages externalized.
+- **i18n (en, hi, nl)** — `MessageService` and `messages_en.properties`, `messages_hi.properties`, `messages_nl.properties`; `Accept-Language` drives language (default via `app.default-locale`); error and success message keys externalized.
 - **Health checks** — SmallRye Health: `/q/health`, `/q/health/live`, `/q/health/ready` (readiness includes DB).
 - **Swagger UI & OpenAPI** — SmallRye OpenAPI: `/q/swagger-ui`, `/q/openapi` (YAML); Store, Product, and Warehouse endpoints discoverable.
 - **Postman collection** — `postman/Java-Assignment-API.postman_collection.json` with Store, Product, and Warehouse requests; variable `baseUrl` (default `http://localhost:8080`).
@@ -125,6 +125,17 @@ Connection settings for **production profile** are in `src/main/resources/applic
 java -jar target/quarkus-app/quarkus-run.jar
 ```
 
+**5.3 Docker Compose (app + PostgreSQL)**
+
+From the `java-assignment` directory, after building the JAR:
+
+```bash
+./mvnw package -DskipTests
+docker compose up --build
+```
+
+Then open http://localhost:8080. See [.env.example](.env.example) for optional environment variables.
+
 Or with production profile:
 
 ```bash
@@ -148,10 +159,12 @@ java -Dquarkus.profile=prod -jar target/quarkus-app/quarkus-run.jar
 | **Store** | `/store` | GET (list), GET `/{id}`, POST, PUT `/{id}`, PATCH `/{id}`, DELETE `/{id}` | `page`, `size` |
 | **Product** | `/product` | GET (list), GET `/{id}`, POST, PUT `/{id}`, DELETE `/{id}` | `page`, `size` |
 | **Warehouse** | `/warehouse` | GET (list), GET `/{id}`, POST, DELETE `/{id}` (archive), POST `/{businessUnitCode}/replacement` | `page`, `size` |
+| **Fulfilment** | `/store/{storeId}/fulfilment` | POST (assign warehouse to product for store; body: `warehouseBusinessUnitCode`, `productId`). Constraints: max 2 warehouses per product per store, max 3 warehouses per store, max 5 products per warehouse. Returns 201, 400, or 409. | — |
 
 - **Error format:** All errors return a common JSON body (`status`, `message`, `traceId`, `path`, `errorCode`, etc.); see [DOCUMENTATION](DOCUMENTATION.md).
+- **Language (Accept-Language):** API messages (errors, validation) are localized. Send `Accept-Language: en`, `Accept-Language: hi`, or `Accept-Language: nl` to get English, Hindi, or Dutch. Default when omitted is configurable via `app.default-locale` (default: `en`). Response headers include `X-Response-Time-Ms` (processing time in milliseconds).
 - **Swagger UI:** http://localhost:8080/q/swagger-ui — try all endpoints.
-- **Postman:** Import `postman/Java-Assignment-API.postman_collection.json`; set `baseUrl` to `http://localhost:8080` (or your server).
+- **Postman:** Import `postman/Java-Assignment-API.postman_collection.json`; set `baseUrl` (and optionally `acceptLanguage`, e.g. `hi` or `nl`) for localized responses.
 - **Health:** Use `/q/health`, `/q/health/live`, `/q/health/ready` for probes (e.g. Kubernetes, load balancers).
 
 ---
@@ -214,6 +227,7 @@ java-assignment/
 | [PRODUCTION_IMPROVEMENTS_REPORT](PRODUCTION_IMPROVEMENTS_REPORT.md) | Production-style changes (errors, i18n, logging, health, etc.). |
 | [API_VERIFICATION](API_VERIFICATION.md) | How to verify APIs, health, Swagger, Postman, CRUD. |
 | [QUESTIONS](QUESTIONS.md) | Design and improvement questions (with suggested answers). |
+| [ENHANCEMENTS](ENHANCEMENTS.md) | List of advanced features (multi-lingual, metrics, Docker, etc.) and status. |
 
 ---
 

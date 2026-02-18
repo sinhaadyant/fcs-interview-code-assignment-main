@@ -14,7 +14,8 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.WebApplicationException;
+import com.fulfilment.application.monolith.common.BusinessException;
+import com.fulfilment.application.monolith.common.MessageService;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
 import jakarta.transaction.Synchronization;
@@ -36,8 +37,8 @@ import org.jboss.logging.Logger;
 public class StoreResource {
 
   @Inject LegacyStoreManagerGateway legacyStoreManagerGateway;
-
   @Inject TransactionSynchronizationRegistry transactionSynchronizationRegistry;
+  @Inject MessageService messageService;
 
   private static final Logger LOGGER = Logger.getLogger(StoreResource.class.getName());
 
@@ -59,7 +60,7 @@ public class StoreResource {
   public Store getSingle(Long id) {
     Store entity = Store.findById(id);
     if (entity == null) {
-      throw new WebApplicationException("Store with id of " + id + " does not exist.", 404);
+      throw new BusinessException("store.not_found", 404, "NF_001", id);
     }
     return entity;
   }
@@ -68,7 +69,7 @@ public class StoreResource {
   @Transactional
   public Response create(@jakarta.validation.Valid Store store) {
     if (store.id != null) {
-      throw new WebApplicationException("Id was invalidly set on request.", 422);
+      throw new BusinessException("store.id_invalid", 422, "VAL_001");
     }
 
     LOGGER.infov("Creating store name={0}", store.name);
@@ -88,7 +89,7 @@ public class StoreResource {
           }
         });
 
-    return Response.ok(store).status(201).build();
+    return Response.ok(store).status(201).header("X-Message", messageService.get("store.created")).build();
   }
 
   @PUT
@@ -96,13 +97,13 @@ public class StoreResource {
   @Transactional
   public Store update(Long id, @jakarta.validation.Valid Store updatedStore) {
     if (updatedStore.name == null) {
-      throw new WebApplicationException("Store Name was not set on request.", 422);
+      throw new BusinessException("store.name_required", 422, "VAL_001");
     }
 
     Store entity = Store.findById(id);
 
     if (entity == null) {
-      throw new WebApplicationException("Store with id of " + id + " does not exist.", 404);
+      throw new BusinessException("store.not_found", 404, "NF_001", id);
     }
 
     entity.name = updatedStore.name;
@@ -132,13 +133,13 @@ public class StoreResource {
   @Transactional
   public Store patch(Long id, @jakarta.validation.Valid Store updatedStore) {
     if (updatedStore.name == null) {
-      throw new WebApplicationException("Store Name was not set on request.", 422);
+      throw new BusinessException("store.name_required", 422, "VAL_001");
     }
 
     Store entity = Store.findById(id);
 
     if (entity == null) {
-      throw new WebApplicationException("Store with id of " + id + " does not exist.", 404);
+      throw new BusinessException("store.not_found", 404, "NF_001", id);
     }
 
     if (updatedStore.name != null) {
@@ -173,7 +174,7 @@ public class StoreResource {
   public Response delete(Long id) {
     Store entity = Store.findById(id);
     if (entity == null) {
-      throw new WebApplicationException("Store with id of " + id + " does not exist.", 404);
+      throw new BusinessException("store.not_found", 404, "NF_001", id);
     }
     LOGGER.infov("Deleting store id={0}", id);
     entity.delete();

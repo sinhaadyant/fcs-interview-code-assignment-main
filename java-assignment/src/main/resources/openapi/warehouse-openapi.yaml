@@ -4,6 +4,12 @@ info:
   description: |
     API for managing warehouse units. All 4xx/5xx error responses use a common JSON format
     (code, error, exceptionType) shared with Store and Product APIs.
+
+    **Product fulfilment:** POST `/store/{storeId}/fulfilment` with body
+    `{ "warehouseBusinessUnitCode": "...", "productId": 1 }` assigns a warehouse to fulfil
+    a product for a store. Constraints: max 2 warehouses per product per store, max 3
+    warehouses per store, max 5 products per warehouse. Returns 201, 400 (e.g. warehouse not
+    found), or 409 (constraint violated).
   version: 1.0.0
 
 paths:

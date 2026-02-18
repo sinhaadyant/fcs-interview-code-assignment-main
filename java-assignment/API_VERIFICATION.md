@@ -32,11 +32,17 @@ With the app running (`./mvnw quarkus:dev`):
 
 **Paths in OpenAPI:** `/store`, `/store/{id}`, `/product`, `/product/{id}`, `/warehouse`, `/warehouse/{id}`, `/warehouse/{businessUnitCode}/replacement`.
 
-## 4. Postman
+## 4. Language (Accept-Language)
+
+- Send header `Accept-Language: en` (default), `Accept-Language: hi`, or `Accept-Language: nl` to receive error and validation messages in English, Hindi, or Dutch.
+- Default when the header is omitted: `app.default-locale` in `application.properties` (default `en`).
+- Responses include `X-Response-Time-Ms` (processing time in milliseconds).
+
+## 5. Postman
 
 - **Collection:** `postman/Java-Assignment-API.postman_collection.json`
 - **Import in Postman:** File → Import → select the collection file.
-- **Variable:** `baseUrl` = `http://localhost:8080` (change if your server runs elsewhere).
+- **Variables:** `baseUrl` = `http://localhost:8080`; optional `acceptLanguage` = `en` | `hi` | `nl` (set header `Accept-Language` to this value for localized messages).
 
 **Requests in collection:**
 
@@ -46,7 +52,7 @@ With the app running (`./mvnw quarkus:dev`):
 | Product | List (GET), Get by id (GET), Create (POST), Update (PUT), Delete (DELETE) |
 | Warehouse | List (GET), Get by id (GET), Create (POST), Replace (POST .../replacement), Archive (DELETE) |
 
-## 5. CRUD verification (manual / curl)
+## 6. CRUD verification (manual / curl)
 
 With app running on port 8080:
 

@@ -50,7 +50,14 @@ public class GlobalApiExceptionMapper implements ExceptionMapper<Exception> {
       status = be.getStatus();
       errorCode = be.getErrorCode();
       String key = be.getMessageKey();
-      message = key != null ? messageService.get(key, language) : be.getMessage();
+      Object[] args = be.getMessageArgs();
+      if (key != null) {
+        message = args != null && args.length > 0
+            ? messageService.get(key, language, args)
+            : messageService.get(key, language);
+      } else {
+        message = be.getMessage();
+      }
       errorPhrase = status == 404 ? messageService.get(ERR_NOT_FOUND, language) : messageService.get(ERR_BAD_REQUEST, language);
     } else if (exception instanceof WebApplicationException wae) {
       Response r = wae.getResponse();

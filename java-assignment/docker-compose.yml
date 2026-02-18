@@ -1,0 +1,33 @@
+# Local run: app + PostgreSQL. From java-assignment directory:
+#   ./mvnw package -DskipTests
+#   docker compose up --build
+# Then: http://localhost:8080, health http://localhost:8080/q/health
+services:
+  postgres:
+    image: postgres:13.3
+    environment:
+      POSTGRES_USER: quarkus_test
+      POSTGRES_PASSWORD: quarkus_test
+      POSTGRES_DB: quarkus_test
+    ports:
+      - "15432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quarkus_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: src/main/docker/Dockerfile.jvm
+    environment:
+      QUARKUS_PROFILE: prod
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://postgres:5432/quarkus_test
+      QUARKUS_DATASOURCE_USERNAME: quarkus_test
+      QUARKUS_DATASOURCE_PASSWORD: quarkus_test
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy_started

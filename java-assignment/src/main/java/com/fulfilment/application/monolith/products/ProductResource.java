@@ -12,7 +12,8 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.WebApplicationException;
+import com.fulfilment.application.monolith.common.BusinessException;
+import com.fulfilment.application.monolith.common.MessageService;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.QueryParam;
 import java.util.List;
@@ -32,6 +33,7 @@ import org.jboss.logging.Logger;
 public class ProductResource {
 
   @Inject ProductRepository productRepository;
+  @Inject MessageService messageService;
 
   private static final Logger LOGGER = Logger.getLogger(ProductResource.class.getName());
 
@@ -53,7 +55,7 @@ public class ProductResource {
   public Product getSingle(Long id) {
     Product entity = productRepository.findById(id);
     if (entity == null) {
-      throw new WebApplicationException("Product with id of " + id + " does not exist.", 404);
+      throw new BusinessException("product.not_found", 404, "NF_001", id);
     }
     return entity;
   }
@@ -62,12 +64,12 @@ public class ProductResource {
   @Transactional
   public Response create(@jakarta.validation.Valid Product product) {
     if (product.id != null) {
-      throw new WebApplicationException("Id was invalidly set on request.", 422);
+      throw new BusinessException("product.id_invalid", 422, "VAL_001");
     }
 
     LOGGER.infov("Creating product name={0}", product.name);
     productRepository.persist(product);
-    return Response.ok(product).status(201).build();
+    return Response.ok(product).status(201).header("X-Message", messageService.get("product.created")).build();
   }
 
   @PUT
@@ -75,13 +77,13 @@ public class ProductResource {
   @Transactional
   public Product update(Long id, @jakarta.validation.Valid Product product) {
     if (product.name == null) {
-      throw new WebApplicationException("Product Name was not set on request.", 422);
+      throw new BusinessException("product.name_required", 422, "VAL_001");
     }
 
     Product entity = productRepository.findById(id);
 
     if (entity == null) {
-      throw new WebApplicationException("Product with id of " + id + " does not exist.", 404);
+      throw new BusinessException("product.not_found", 404, "NF_001", id);
     }
 
     entity.name = product.name;
@@ -101,7 +103,7 @@ public class ProductResource {
   public Response delete(Long id) {
     Product entity = productRepository.findById(id);
     if (entity == null) {
-      throw new WebApplicationException("Product with id of " + id + " does not exist.", 404);
+      throw new BusinessException("product.not_found", 404, "NF_001", id);
     }
     LOGGER.infov("Deleting product id={0}", id);
     productRepository.delete(entity);

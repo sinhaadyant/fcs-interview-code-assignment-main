@@ -1,5 +1,6 @@
 package com.fulfilment.application.monolith.common;
 
+import jakarta.inject.Inject;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ContainerResponseContext;
@@ -10,17 +11,24 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
 /**
- * Generates a unique request ID (traceId), sets request path and language from Accept-Language,
- * and stores them in RequestContext for logging and error responses.
+ * Generates a unique request ID (traceId), sets request path and language from Accept-Language
+ * (or default locale from config), and stores them in RequestContext. Adds X-Response-Time-Ms
+ * on responses. Used for logging and error responses.
  */
 @Provider
 public class RequestContextFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
   private static final Logger LOGGER = Logger.getLogger(RequestContextFilter.class);
   private static final String REQUEST_ID_HEADER = "X-Request-Id";
+  private static final String RESPONSE_TIME_HEADER = "X-Response-Time-Ms";
+
+  @Inject
+  @ConfigProperty(name = "app.default-locale", defaultValue = "en")
+  String defaultLocale;
 
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -36,16 +44,19 @@ public class RequestContextFilter implements ContainerRequestFilter, ContainerRe
       path = p.startsWith("/") ? p : "/" + p;
     }
 
-    String language = "en";
+    String language = defaultLocale != null && !defaultLocale.isBlank() ? defaultLocale.trim() : "en";
     List<String> acceptLanguage = requestContext.getHeaders().get("Accept-Language");
     if (acceptLanguage != null && !acceptLanguage.isEmpty()) {
       String raw = acceptLanguage.get(0);
       if (raw != null && !raw.isBlank()) {
-        if (raw.toLowerCase().startsWith("hi")) {
+        String tag = raw.split(",")[0].trim();
+        if (tag.toLowerCase().startsWith("hi")) {
           language = "hi";
+        } else if (tag.toLowerCase().startsWith("nl")) {
+          language = "nl";
         } else {
-          language = Locale.forLanguageTag(raw.split(",")[0].trim()).getLanguage();
-          if (language == null || language.isBlank()) language = "en";
+          String parsed = Locale.forLanguageTag(tag).getLanguage();
+          if (parsed != null && !parsed.isBlank()) language = parsed;
         }
       }
     }
@@ -57,6 +68,7 @@ public class RequestContextFilter implements ContainerRequestFilter, ContainerRe
   @Override
   public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
     long processingMs = RequestContext.processingTimeMs();
+    responseContext.getHeaders().putSingle(RESPONSE_TIME_HEADER, processingMs);
     LOGGER.infof("Request completed requestId=%s path=%s status=%s processingTimeMs=%d",
         RequestContext.getRequestId(),
         RequestContext.getPath(),

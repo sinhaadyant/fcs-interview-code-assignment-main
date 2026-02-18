@@ -73,4 +73,35 @@ public class WarehouseEndpointIT {
         .statusCode(200)
         .body(containsString("AMSTERDAM-001"), containsString("60"));
   }
+
+  @Test
+  public void testFulfilmentAssign() {
+    // Assign warehouse MWH.001 to product 1 for store 1 -> 201
+    given()
+        .contentType("application/json")
+        .body("{\"warehouseBusinessUnitCode\": \"MWH.001\", \"productId\": 1}")
+        .when()
+        .post("store/1/fulfilment")
+        .then()
+        .statusCode(201)
+        .header("X-Message", containsString("assigned"));
+
+    // Idempotent: same assignment again -> 201
+    given()
+        .contentType("application/json")
+        .body("{\"warehouseBusinessUnitCode\": \"MWH.001\", \"productId\": 1}")
+        .when()
+        .post("store/1/fulfilment")
+        .then()
+        .statusCode(201);
+
+    // Invalid warehouse -> 400
+    given()
+        .contentType("application/json")
+        .body("{\"warehouseBusinessUnitCode\": \"INVALID\", \"productId\": 1}")
+        .when()
+        .post("store/1/fulfilment")
+        .then()
+        .statusCode(400);
+  }
 }

@@ -1,5 +1,6 @@
 package com.fulfilment.application.monolith.warehouses.adapters.restapi;
 
+import com.fulfilment.application.monolith.common.BusinessException;
 import com.fulfilment.application.monolith.warehouses.adapters.database.DbWarehouse;
 import com.fulfilment.application.monolith.warehouses.adapters.database.WarehouseRepository;
 import com.fulfilment.application.monolith.warehouses.domain.ports.ArchiveWarehouseOperation;
@@ -12,9 +13,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import java.util.List;
 import org.jboss.logging.Logger;
@@ -70,19 +69,19 @@ public class WarehouseResourceImpl implements WarehouseResource {
   @Override
   public Warehouse getAWarehouseUnitByID(String id) {
     if (id == null) {
-      throw new WebApplicationException("Warehouse id is required", Response.Status.NOT_FOUND.getStatusCode());
+      throw new BusinessException("warehouse.id_required", 400, "VAL_001");
     }
 
     Long dbId;
     try {
       dbId = Long.valueOf(id);
     } catch (NumberFormatException ex) {
-      throw new WebApplicationException("Warehouse unit not found", Response.Status.NOT_FOUND.getStatusCode());
+      throw new BusinessException("warehouse.not_found", 404, "NF_001");
     }
 
     DbWarehouse dbWarehouse = warehouseRepository.findById(dbId);
     if (dbWarehouse == null || dbWarehouse.archivedAt != null) {
-      throw new WebApplicationException("Warehouse unit not found", Response.Status.NOT_FOUND.getStatusCode());
+      throw new BusinessException("warehouse.not_found", 404, "NF_001");
     }
 
     return toWarehouseResponse(dbWarehouse);
@@ -92,19 +91,19 @@ public class WarehouseResourceImpl implements WarehouseResource {
   @Transactional
   public void archiveAWarehouseUnitByID(String id) {
     if (id == null) {
-      throw new WebApplicationException("Warehouse id is required", Response.Status.NOT_FOUND.getStatusCode());
+      throw new BusinessException("warehouse.id_required", 400, "VAL_001");
     }
 
     Long dbId;
     try {
       dbId = Long.valueOf(id);
     } catch (NumberFormatException ex) {
-      throw new WebApplicationException("Warehouse unit not found", Response.Status.NOT_FOUND.getStatusCode());
+      throw new BusinessException("warehouse.not_found", 404, "NF_001");
     }
 
     DbWarehouse dbWarehouse = warehouseRepository.findById(dbId);
     if (dbWarehouse == null || dbWarehouse.archivedAt != null) {
-      throw new WebApplicationException("Warehouse unit not found", Response.Status.NOT_FOUND.getStatusCode());
+      throw new BusinessException("warehouse.not_found", 404, "NF_001");
     }
 
     com.fulfilment.application.monolith.warehouses.domain.models.Warehouse warehouse =

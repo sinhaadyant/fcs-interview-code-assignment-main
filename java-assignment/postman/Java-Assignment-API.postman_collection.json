@@ -1,11 +1,12 @@
 {
   "info": {
     "name": "Java Code Assignment API",
-    "description": "Store, Product, and Warehouse REST APIs. Set `baseUrl` to e.g. http://localhost:8080 when the app is running.",
+    "description": "Store, Product, and Warehouse REST APIs. Set `baseUrl` (e.g. http://localhost:8080) and optionally `acceptLanguage` (en, hi, nl) for localized messages.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost:8080" }
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "acceptLanguage", "value": "en" }
   ],
   "item": [
     {
@@ -31,7 +32,10 @@
           "name": "Create store",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept-Language", "value": "{{acceptLanguage}}" }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"NEW_STORE\",\n  \"quantityProductsInStock\": 5\n}"
