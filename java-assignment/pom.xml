@@ -42,7 +42,11 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-jdbc-postgresql</artifactId>
         </dependency>
-
+        <!-- H2 for tests and for CI build (no Docker). Prod uses PostgreSQL via QUARKUS_DATASOURCE_* or %prod. -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-jdbc-h2</artifactId>
+        </dependency>
         <!-- Testing: -->
         <dependency>
             <groupId>io.quarkus</groupId>

@@ -17,9 +17,10 @@ public class WarehouseRepository implements WarehouseStore, PanacheRepository<Db
 
   private static final String ACTIVE_FILTER = "archivedAt is null";
 
+  /** Returns only active warehouses (archivedAt is null); filter is applied in the DB query, not in memory. */
   @Override
   public List<Warehouse> getAll() {
-    return this.listAll().stream().map(DbWarehouse::toWarehouse).toList();
+    return find(ACTIVE_FILTER).list().stream().map(DbWarehouse::toWarehouse).toList();
   }
 
   /** Returns only active (non-archived) warehouses for list endpoint consistency with get-by-id. */
